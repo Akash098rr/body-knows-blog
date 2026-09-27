@@ -1,0 +1,1889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Admin — The Body Knows</title>
+
+  <style>
+    :root {
+      --bg: #080808;
+      --panel: #101010;
+      --panel-2: #151515;
+      --text: #f5f5f5;
+      --muted: #888;
+      --line: rgba(255,255,255,0.1);
+      --accent: #d8ff5f;
+      --danger: #ff6969;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    /* =========================
+       LOGIN
+    ========================= */
+
+    #loginScreen {
+      min-height: 100vh;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 30px;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .login-label {
+      color: var(--accent);
+
+      font-size: 10px;
+      font-weight: 700;
+
+      letter-spacing: 0.25em;
+
+      text-transform: uppercase;
+
+      margin-bottom: 25px;
+    }
+
+    .login-box h1 {
+      font-size: 48px;
+
+      line-height: 0.95;
+
+      letter-spacing: -0.05em;
+
+      margin-bottom: 45px;
+    }
+
+    .field {
+      margin-bottom: 20px;
+    }
+
+    .field label {
+      display: block;
+
+      color: #777;
+
+      font-size: 10px;
+
+      letter-spacing: 0.15em;
+
+      text-transform: uppercase;
+
+      margin-bottom: 9px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+
+      background: #111;
+
+      color: white;
+
+      border: 1px solid var(--line);
+
+      outline: none;
+
+      padding: 15px;
+
+      border-radius: 0;
+
+      transition:
+        border-color 0.25s ease,
+        background 0.25s ease;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #777;
+
+      background: #151515;
+    }
+
+    textarea {
+      resize: vertical;
+
+      min-height: 450px;
+
+      line-height: 1.7;
+    }
+
+    .button {
+      border: 0;
+
+      background: white;
+
+      color: black;
+
+      padding: 14px 22px;
+
+      cursor: pointer;
+
+      font-size: 11px;
+
+      font-weight: 700;
+
+      letter-spacing: 0.15em;
+
+      text-transform: uppercase;
+
+      transition:
+        background 0.25s ease,
+        transform 0.25s ease;
+    }
+
+    .button:hover {
+      background: var(--accent);
+
+      transform: translateY(-2px);
+    }
+
+    .button.dark {
+      background: #181818;
+
+      color: white;
+
+      border: 1px solid var(--line);
+    }
+
+    .button.dark:hover {
+      background: #222;
+    }
+
+    .button.danger {
+      color: var(--danger);
+
+      background: transparent;
+
+      border: 1px solid rgba(255,105,105,0.3);
+    }
+
+    .button.danger:hover {
+      background: rgba(255,105,105,0.08);
+    }
+
+    .error {
+      color: var(--danger);
+
+      font-size: 13px;
+
+      margin-top: 15px;
+    }
+
+    /* =========================
+       ADMIN
+    ========================= */
+
+    #adminScreen {
+      display: none;
+
+      min-height: 100vh;
+    }
+
+    .topbar {
+      height: 75px;
+
+      border-bottom: 1px solid var(--line);
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      padding: 0 35px;
+
+      position: sticky;
+
+      top: 0;
+
+      z-index: 50;
+
+      background:
+        rgba(8,8,8,0.9);
+
+      backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      font-size: 11px;
+
+      font-weight: 700;
+
+      letter-spacing: 0.16em;
+
+      text-transform: uppercase;
+    }
+
+    .top-actions {
+      display: flex;
+
+      gap: 10px;
+    }
+
+    .admin-layout {
+      display: grid;
+
+      grid-template-columns:
+        300px 1fr;
+
+      min-height:
+        calc(100vh - 75px);
+    }
+
+    /* =========================
+       SIDEBAR
+    ========================= */
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+
+      padding: 35px 25px;
+
+      background: #0b0b0b;
+    }
+
+    .sidebar-title {
+      color: #555;
+
+      font-size: 10px;
+
+      letter-spacing: 0.2em;
+
+      text-transform: uppercase;
+
+      margin-bottom: 20px;
+    }
+
+    #articleList {
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 5px;
+    }
+
+    .article-item {
+      border: 1px solid transparent;
+
+      padding: 15px;
+
+      cursor: pointer;
+
+      transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+    }
+
+    .article-item:hover {
+      background: #111;
+
+      border-color: var(--line);
+    }
+
+    .article-item.active {
+      background: #151515;
+
+      border-color: #333;
+    }
+
+    .article-item-title {
+      font-size: 14px;
+
+      line-height: 1.3;
+
+      margin-bottom: 7px;
+    }
+
+    .article-item-meta {
+      color: #555;
+
+      font-size: 9px;
+
+      letter-spacing: 0.1em;
+
+      text-transform: uppercase;
+    }
+
+    .empty-list {
+      color: #555;
+
+      font-size: 13px;
+
+      line-height: 1.6;
+    }
+
+    /* =========================
+       EDITOR
+    ========================= */
+
+    .editor {
+      padding: 50px 6vw 100px;
+
+      max-width: 1100px;
+
+      width: 100%;
+    }
+
+    .editor-header {
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: flex-end;
+
+      margin-bottom: 45px;
+
+      padding-bottom: 25px;
+
+      border-bottom: 1px solid var(--line);
+    }
+
+    .editor-label {
+      color: var(--accent);
+
+      font-size: 10px;
+
+      letter-spacing: 0.2em;
+
+      text-transform: uppercase;
+
+      margin-bottom: 10px;
+    }
+
+    .editor-header h1 {
+      font-size:
+        clamp(35px, 5vw, 65px);
+
+      line-height: 0.95;
+
+      letter-spacing: -0.05em;
+    }
+
+    .status {
+      color: #666;
+
+      font-size: 10px;
+
+      letter-spacing: 0.12em;
+
+      text-transform: uppercase;
+    }
+
+    .grid {
+      display: grid;
+
+      grid-template-columns:
+        1fr 280px;
+
+      gap: 35px;
+    }
+
+    .main-column,
+    .side-column {
+      min-width: 0;
+    }
+
+    .main-column .field {
+      margin-bottom: 25px;
+    }
+
+    .title-input {
+      font-size: 25px;
+
+      font-weight: 500;
+
+      padding: 20px;
+    }
+
+    .excerpt-input {
+      min-height: 130px;
+    }
+
+    .content-label {
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      margin-bottom: 9px;
+    }
+
+    .content-help {
+      color: #444;
+
+      font-size: 10px;
+    }
+
+    /* =========================
+       SIDE PANEL
+    ========================= */
+
+    .side-column {
+      position: sticky;
+
+      top: 110px;
+
+      align-self: start;
+    }
+
+    .side-panel {
+      border: 1px solid var(--line);
+
+      background: #0d0d0d;
+
+      padding: 22px;
+
+      margin-bottom: 15px;
+    }
+
+    .side-panel-title {
+      color: #555;
+
+      font-size: 10px;
+
+      letter-spacing: 0.18em;
+
+      text-transform: uppercase;
+
+      margin-bottom: 18px;
+    }
+
+    .publish-box {
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      padding: 15px 0;
+
+      border-top: 1px solid var(--line);
+
+      border-bottom: 1px solid var(--line);
+
+      margin: 15px 0;
+    }
+
+    .publish-box span {
+      font-size: 13px;
+    }
+
+    /* =========================
+       TOGGLE
+    ========================= */
+
+    .toggle {
+      position: relative;
+
+      width: 45px;
+
+      height: 24px;
+    }
+
+    .toggle input {
+      display: none;
+    }
+
+    .slider {
+      position: absolute;
+
+      inset: 0;
+
+      background: #222;
+
+      border: 1px solid #333;
+
+      cursor: pointer;
+
+      transition: 0.25s;
+    }
+
+    .slider::before {
+      content: "";
+
+      position: absolute;
+
+      width: 16px;
+      height: 16px;
+
+      left: 3px;
+      top: 3px;
+
+      background: #777;
+
+      transition: 0.25s;
+    }
+
+    .toggle input:checked + .slider {
+      background: var(--accent);
+
+      border-color: var(--accent);
+    }
+
+    .toggle input:checked
+    + .slider::before {
+      transform: translateX(21px);
+
+      background: black;
+    }
+
+    /* =========================
+       IMAGE
+    ========================= */
+
+    .image-preview {
+      width: 100%;
+
+      aspect-ratio: 16 / 10;
+
+      background: #111;
+
+      overflow: hidden;
+
+      margin-top: 15px;
+
+      display: none;
+    }
+
+    .image-preview img {
+      width: 100%;
+
+      height: 100%;
+
+      object-fit: cover;
+    }
+
+    .upload-label {
+      display: block;
+
+      border: 1px dashed #333;
+
+      padding: 20px;
+
+      text-align: center;
+
+      cursor: pointer;
+
+      color: #666;
+
+      font-size: 11px;
+
+      letter-spacing: 0.1em;
+
+      text-transform: uppercase;
+
+      transition:
+        border-color 0.25s,
+        color 0.25s;
+    }
+
+    .upload-label:hover {
+      border-color: #777;
+
+      color: white;
+    }
+
+    #imageInput {
+      display: none;
+    }
+
+    /* =========================
+       ACTIONS
+    ========================= */
+
+    .editor-actions {
+      display: flex;
+
+      gap: 10px;
+
+      margin-top: 30px;
+
+      padding-top: 25px;
+
+      border-top: 1px solid var(--line);
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 900px) {
+
+      .admin-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        border-right: 0;
+
+        border-bottom: 1px solid var(--line);
+
+        padding: 20px;
+      }
+
+      #articleList {
+        display: grid;
+
+        grid-template-columns:
+          repeat(2, 1fr);
+      }
+
+      .editor {
+        padding:
+          35px 22px
+          70px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .side-column {
+        position: static;
+      }
+    }
+
+    @media (max-width: 600px) {
+
+      .topbar {
+        padding: 0 18px;
+      }
+
+      .brand {
+        font-size: 9px;
+      }
+
+      .top-actions .button {
+        padding: 10px 12px;
+
+        font-size: 9px;
+      }
+
+      #articleList {
+        grid-template-columns: 1fr;
+      }
+
+      .editor-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 15px;
+      }
+
+      .title-input {
+        font-size: 20px;
+      }
+
+      .editor-actions {
+        flex-direction: column;
+      }
+
+      .editor-actions .button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================
+       LOGIN
+  ========================= -->
+
+  <section id="loginScreen">
+
+    <div class="login-box">
+
+      <div class="login-label">
+        Private Writing Studio
+      </div>
+
+      <h1>
+        Welcome<br>
+        Back.
+      </h1>
+
+      <form id="loginForm">
+
+        <div class="field">
+
+          <label>
+            Username
+          </label>
+
+          <input
+            id="username"
+            type="text"
+            autocomplete="username"
+            required
+          >
+
+        </div>
+
+        <div class="field">
+
+          <label>
+            Password
+          </label>
+
+          <input
+            id="password"
+            type="password"
+            autocomplete="current-password"
+            required
+          >
+
+        </div>
+
+        <button
+          class="button"
+          type="submit"
+        >
+          Enter Studio
+        </button>
+
+        <div
+          id="loginError"
+          class="error"
+        ></div>
+
+      </form>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       ADMIN
+  ========================= -->
+
+  <section id="adminScreen">
+
+    <header class="topbar">
+
+      <div class="brand">
+        THE BODY KNOWS WHAT THE MIND FEELS
+      </div>
+
+      <div class="top-actions">
+
+        <button
+          class="button dark"
+          onclick="newArticle()"
+        >
+          + New Article
+        </button>
+
+        <button
+          class="button dark"
+          onclick="logout()"
+        >
+          Logout
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <div class="admin-layout">
+
+      <!-- SIDEBAR -->
+
+      <aside class="sidebar">
+
+        <div class="sidebar-title">
+          Your Stories
+        </div>
+
+        <div id="articleList">
+          <div class="empty-list">
+            Loading...
+          </div>
+        </div>
+
+      </aside>
+
+
+      <!-- EDITOR -->
+
+      <main class="editor">
+
+        <div class="editor-header">
+
+          <div>
+
+            <div class="editor-label">
+              Writing Studio
+            </div>
+
+            <h1 id="editorHeading">
+              New Story
+            </h1>
+
+          </div>
+
+          <div
+            id="status"
+            class="status"
+          >
+            New article
+          </div>
+
+        </div>
+
+
+        <div class="grid">
+
+          <!-- MAIN -->
+
+          <div class="main-column">
+
+            <div class="field">
+
+              <label>
+                Title
+              </label>
+
+              <input
+                id="title"
+                class="title-input"
+                type="text"
+                placeholder="Give your story a name..."
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Excerpt
+              </label>
+
+              <textarea
+                id="excerpt"
+                class="excerpt-input"
+                placeholder="A short introduction to your story..."
+              ></textarea>
+
+            </div>
+
+
+            <div class="field">
+
+              <div class="content-label">
+
+                <label>
+                  Story
+                </label>
+
+                <span class="content-help">
+                  ## Heading &nbsp; | &nbsp; > Quote
+                </span>
+
+              </div>
+
+              <textarea
+                id="content"
+                placeholder="Start writing..."
+              ></textarea>
+
+            </div>
+
+          </div>
+
+
+          <!-- SIDE -->
+
+          <aside class="side-column">
+
+            <div class="side-panel">
+
+              <div class="side-panel-title">
+                Story Settings
+              </div>
+
+
+              <div class="field">
+
+                <label>
+                  Category
+                </label>
+
+                <select id="category">
+
+                  <option value="Mind">
+                    Mind
+                  </option>
+
+                  <option value="Body">
+                    Body
+                  </option>
+
+                  <option value="Growth">
+                    Growth
+                  </option>
+
+                  <option value="Life">
+                    Life
+                  </option>
+
+                  <option value="Journal">
+                    Journal
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              <div class="publish-box">
+
+                <span>
+                  Published
+                </span>
+
+                <label class="toggle">
+
+                  <input
+                    id="published"
+                    type="checkbox"
+                  >
+
+                  <span class="slider"></span>
+
+                </label>
+
+              </div>
+
+            </div>
+
+
+            <div class="side-panel">
+
+              <div class="side-panel-title">
+                Featured Image
+              </div>
+
+              <label
+                class="upload-label"
+                for="imageInput"
+              >
+                Choose Image
+              </label>
+
+              <input
+                id="imageInput"
+                type="file"
+                accept="image/*"
+              >
+
+              <div
+                id="imagePreview"
+                class="image-preview"
+              >
+
+                <img
+                  id="previewImage"
+                  alt=""
+                >
+
+              </div>
+
+            </div>
+
+
+            <div class="side-panel">
+
+              <div class="side-panel-title">
+                Actions
+              </div>
+
+              <button
+                class="button"
+                style="width:100%;"
+                onclick="saveArticle()"
+              >
+                Save Story
+              </button>
+
+              <br><br>
+
+              <button
+                id="deleteButton"
+                class="button danger"
+                style="width:100%; display:none;"
+                onclick="deleteArticle()"
+              >
+                Delete Story
+              </button>
+
+            </div>
+
+          </aside>
+
+        </div>
+
+
+        <div class="editor-actions">
+
+          <button
+            class="button dark"
+            onclick="previewArticle()"
+          >
+            Preview
+          </button>
+
+          <button
+            class="button dark"
+            onclick="newArticle()"
+          >
+            Clear Editor
+          </button>
+
+        </div>
+
+      </main>
+
+    </div>
+
+  </section>
+
+
+  <script>
+
+    let currentArticleId = null;
+
+    let currentImageUrl = null;
+
+
+    // =========================
+    // LOGIN
+    // =========================
+
+    document
+      .getElementById("loginForm")
+      .addEventListener(
+        "submit",
+        async function(event) {
+
+          event.preventDefault();
+
+          const username =
+            document.getElementById(
+              "username"
+            ).value;
+
+          const password =
+            document.getElementById(
+              "password"
+            ).value;
+
+          const error =
+            document.getElementById(
+              "loginError"
+            );
+
+          error.textContent = "";
+
+
+          try {
+
+            const response =
+              await fetch(
+                "/api/login",
+                {
+                  method: "POST",
+
+                  headers: {
+                    "Content-Type":
+                      "application/json"
+                  },
+
+                  body: JSON.stringify({
+                    username,
+                    password
+                  })
+                }
+              );
+
+
+            const data =
+              await response.json();
+
+
+            if (!response.ok) {
+              throw new Error(
+                data.error ||
+                "Login failed"
+              );
+            }
+
+
+            showAdmin();
+
+          } catch (err) {
+
+            error.textContent =
+              err.message;
+
+          }
+
+        }
+      );
+
+
+    // =========================
+    // SHOW ADMIN
+    // =========================
+
+    function showAdmin() {
+
+      document.getElementById(
+        "loginScreen"
+      ).style.display = "none";
+
+      document.getElementById(
+        "adminScreen"
+      ).style.display = "block";
+
+      loadArticles();
+
+      newArticle();
+    }
+
+
+    // =========================
+    // LOAD ARTICLES
+    // =========================
+
+    async function loadArticles() {
+
+      const list =
+        document.getElementById(
+          "articleList"
+        );
+
+      try {
+
+        const response =
+          await fetch(
+            "/api/admin/articles"
+          );
+
+
+        if (response.status === 401) {
+
+          document.getElementById(
+            "loginScreen"
+          ).style.display = "flex";
+
+          document.getElementById(
+            "adminScreen"
+          ).style.display = "none";
+
+          return;
+        }
+
+
+        const articles =
+          await response.json();
+
+
+        if (!articles.length) {
+
+          list.innerHTML = `
+            <div class="empty-list">
+              No stories yet.<br>
+              Start writing your first one.
+            </div>
+          `;
+
+          return;
+        }
+
+
+        list.innerHTML =
+          articles.map(
+            article => `
+
+              <div
+                class="article-item ${
+                  article.id === currentArticleId
+                    ? "active"
+                    : ""
+                }"
+                onclick="editArticle(${article.id})"
+              >
+
+                <div class="article-item-title">
+                  ${escapeHtml(
+                    article.title
+                  )}
+                </div>
+
+                <div class="article-item-meta">
+
+                  ${escapeHtml(
+                    article.category ||
+                    "Story"
+                  )}
+
+                  &nbsp; · &nbsp;
+
+                  ${
+                    article.published
+                      ? "Published"
+                      : "Draft"
+                  }
+
+                </div>
+
+              </div>
+
+            `
+          )
+          .join("");
+
+      } catch (error) {
+
+        console.error(error);
+
+        list.innerHTML =
+          `<div class="empty-list">
+            Could not load stories.
+          </div>`;
+      }
+    }
+
+
+    // =========================
+    // NEW ARTICLE
+    // =========================
+
+    function newArticle() {
+
+      currentArticleId = null;
+
+      currentImageUrl = null;
+
+      document.getElementById(
+        "editorHeading"
+      ).textContent =
+        "New Story";
+
+      document.getElementById(
+        "status"
+      ).textContent =
+        "New article";
+
+      document.getElementById(
+        "title"
+      ).value = "";
+
+      document.getElementById(
+        "excerpt"
+      ).value = "";
+
+      document.getElementById(
+        "content"
+      ).value = "";
+
+      document.getElementById(
+        "category"
+      ).value = "Mind";
+
+      document.getElementById(
+        "published"
+      ).checked = false;
+
+      document.getElementById(
+        "imageInput"
+      ).value = "";
+
+      document.getElementById(
+        "imagePreview"
+      ).style.display = "none";
+
+      document.getElementById(
+        "deleteButton"
+      ).style.display = "none";
+
+      loadArticles();
+    }
+
+
+    // =========================
+    // EDIT ARTICLE
+    // =========================
+
+    async function editArticle(id) {
+
+      try {
+
+        const response =
+          await fetch(
+            `/api/admin/articles/${id}`
+          );
+
+
+        if (!response.ok) {
+          throw new Error(
+            "Could not load article."
+          );
+        }
+
+
+        const article =
+          await response.json();
+
+
+        currentArticleId =
+          article.id;
+
+        currentImageUrl =
+          article.image_url;
+
+
+        document.getElementById(
+          "editorHeading"
+        ).textContent =
+          "Edit Story";
+
+
+        document.getElementById(
+          "status"
+        ).textContent =
+          article.published
+            ? "Published"
+            : "Draft";
+
+
+        document.getElementById(
+          "title"
+        ).value =
+          article.title || "";
+
+
+        document.getElementById(
+          "excerpt"
+        ).value =
+          article.excerpt || "";
+
+
+        document.getElementById(
+          "content"
+        ).value =
+          article.content || "";
+
+
+        document.getElementById(
+          "category"
+        ).value =
+          article.category || "Mind";
+
+
+        document.getElementById(
+          "published"
+        ).checked =
+          Boolean(
+            article.published
+          );
+
+
+        document.getElementById(
+          "deleteButton"
+        ).style.display =
+          "block";
+
+
+        if (article.image_url) {
+
+          document.getElementById(
+            "previewImage"
+          ).src =
+            article.image_url;
+
+          document.getElementById(
+            "imagePreview"
+          ).style.display =
+            "block";
+
+        } else {
+
+          document.getElementById(
+            "imagePreview"
+          ).style.display =
+            "none";
+        }
+
+
+        loadArticles();
+
+      } catch (error) {
+
+        alert(error.message);
+
+      }
+    }
+
+
+    // =========================
+    // IMAGE PREVIEW
+    // =========================
+
+    document
+      .getElementById("imageInput")
+      .addEventListener(
+        "change",
+        function() {
+
+          const file =
+            this.files[0];
+
+          if (!file) {
+            return;
+          }
+
+
+          const url =
+            URL.createObjectURL(file);
+
+
+          document.getElementById(
+            "previewImage"
+          ).src = url;
+
+
+          document.getElementById(
+            "imagePreview"
+          ).style.display =
+            "block";
+
+        }
+      );
+
+
+    // =========================
+    // SAVE ARTICLE
+    // =========================
+
+    async function saveArticle() {
+
+      const title =
+        document.getElementById(
+          "title"
+        ).value.trim();
+
+      const excerpt =
+        document.getElementById(
+          "excerpt"
+        ).value.trim();
+
+      const content =
+        document.getElementById(
+          "content"
+        ).value.trim();
+
+      const category =
+        document.getElementById(
+          "category"
+        ).value;
+
+      const published =
+        document.getElementById(
+          "published"
+        ).checked;
+
+      const imageInput =
+        document.getElementById(
+          "imageInput"
+        );
+
+
+      if (!title) {
+
+        alert(
+          "Please enter a title."
+        );
+
+        return;
+      }
+
+
+      if (!content) {
+
+        alert(
+          "Please write something first."
+        );
+
+        return;
+      }
+
+
+      try {
+
+        let imageUrl =
+          currentImageUrl;
+
+
+        // Upload new image
+        if (
+          imageInput.files.length
+        ) {
+
+          const formData =
+            new FormData();
+
+          formData.append(
+            "image",
+            imageInput.files[0]
+          );
+
+
+          const uploadResponse =
+            await fetch(
+              "/api/admin/upload",
+              {
+                method: "POST",
+                body: formData
+              }
+            );
+
+
+          const uploadData =
+            await uploadResponse.json();
+
+
+          if (!uploadResponse.ok) {
+            throw new Error(
+              uploadData.error ||
+              "Image upload failed."
+            );
+          }
+
+
+          imageUrl =
+            uploadData.url;
+        }
+
+
+        const articleData = {
+
+          title,
+
+          category,
+
+          excerpt,
+
+          content,
+
+          published,
+
+          image_url: imageUrl
+
+        };
+
+
+        const url =
+          currentArticleId
+            ? `/api/admin/articles/${currentArticleId}`
+            : "/api/admin/articles";
+
+
+        const method =
+          currentArticleId
+            ? "PUT"
+            : "POST";
+
+
+        const response =
+          await fetch(
+            url,
+            {
+              method,
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body:
+                JSON.stringify(
+                  articleData
+                )
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (!response.ok) {
+          throw new Error(
+            data.error ||
+            "Could not save article."
+          );
+        }
+
+
+        currentArticleId =
+          data.id;
+
+        currentImageUrl =
+          data.image_url;
+
+
+        document.getElementById(
+          "editorHeading"
+        ).textContent =
+          "Edit Story";
+
+
+        document.getElementById(
+          "status"
+        ).textContent =
+          data.published
+            ? "Published"
+            : "Draft";
+
+
+        document.getElementById(
+          "deleteButton"
+        ).style.display =
+          "block";
+
+
+        document.getElementById(
+          "imageInput"
+        ).value = "";
+
+
+        await loadArticles();
+
+
+        alert(
+          data.published
+            ? "Story published successfully."
+            : "Draft saved successfully."
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(error.message);
+      }
+    }
+
+
+    // =========================
+    // DELETE ARTICLE
+    // =========================
+
+    async function deleteArticle() {
+
+      if (!currentArticleId) {
+        return;
+      }
+
+
+      const confirmed =
+        confirm(
+          "Delete this story permanently?"
+        );
+
+
+      if (!confirmed) {
+        return;
+      }
+
+
+      try {
+
+        const response =
+          await fetch(
+            `/api/admin/articles/${currentArticleId}`,
+            {
+              method: "DELETE"
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (!response.ok) {
+          throw new Error(
+            data.error ||
+            "Could not delete article."
+          );
+        }
+
+
+        alert(
+          "Story deleted."
+        );
+
+
+        newArticle();
+
+      } catch (error) {
+
+        alert(
+          error.message
+        );
+
+      }
+    }
+
+
+    // =========================
+    // PREVIEW
+    // =========================
+
+    function previewArticle() {
+
+      const title =
+        document.getElementById(
+          "title"
+        ).value.trim();
+
+
+      if (currentArticleId) {
+
+        // Open saved article
+        window.open(
+          `/article.html?slug=${encodeURIComponent(
+            createSlug(title)
+          )}`,
+          "_blank"
+        );
+
+      } else {
+
+        alert(
+          "Save the story first, then preview it."
+        );
+      }
+    }
+
+
+    // =========================
+    // LOGOUT
+    // =========================
+
+    async function logout() {
+
+      await fetch(
+        "/api/logout",
+        {
+          method: "POST"
+        }
+      );
+
+
+      location.reload();
+    }
+
+
+    // =========================
+    // SLUG
+    // =========================
+
+    function createSlug(text) {
+
+      return text
+        .toLowerCase()
+        .trim()
+        .replace(
+          /[^a-z0-9]+/g,
+          "-"
+        )
+        .replace(
+          /^-+|-+$/g,
+          ""
+        );
+    }
+
+
+    // =========================
+    // SECURITY
+    // =========================
+
+    function escapeHtml(text) {
+
+      return String(text)
+        .replace(
+          /&/g,
+          "&amp;"
+        )
+        .replace(
+          /</g,
+          "&lt;"
+        )
+        .replace(
+          />/g,
+          "&gt;"
+        )
+        .replace(
+          /"/g,
+          "&quot;"
+        )
+        .replace(
+          /'/g,
+          "&#039;"
+        );
+    }
+
+  </script>
+
+</body>
+</html>

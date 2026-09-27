@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>The Body Knows What The Mind Feels</title>
+
+  <meta
+    name="description"
+    content="Thoughts on mind, body, growth, discipline, ambition and becoming."
+  >
+
+  <style>
+    :root {
+      --bg: #080808;
+      --text: #f5f5f5;
+      --muted: #8d8d8d;
+      --line: rgba(255,255,255,0.12);
+      --accent: #d8ff5f;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      overflow-x: hidden;
+    }
+
+    /* -------------------------
+       NAVIGATION
+    ------------------------- */
+
+    nav {
+      position: fixed;
+
+      top: 0;
+      left: 0;
+
+      width: 100%;
+      height: 80px;
+
+      padding: 0 5vw;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      z-index: 100;
+
+      background:
+        linear-gradient(
+          to bottom,
+          rgba(8,8,8,0.92),
+          rgba(8,8,8,0)
+        );
+
+      backdrop-filter: blur(8px);
+    }
+
+    .logo {
+      color: white;
+
+      text-decoration: none;
+
+      font-size: 12px;
+
+      font-weight: 700;
+
+      letter-spacing: 0.16em;
+
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+
+      gap: 30px;
+    }
+
+    .nav-links a {
+      color: #999;
+
+      text-decoration: none;
+
+      font-size: 12px;
+
+      letter-spacing: 0.1em;
+
+      text-transform: uppercase;
+
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: white;
+    }
+
+    /* -------------------------
+       HERO
+    ------------------------- */
+
+    .hero {
+      min-height: 100vh;
+
+      position: relative;
+
+      display: flex;
+
+      align-items: center;
+
+      padding:
+        130px 7vw
+        100px;
+
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute;
+
+      width: 650px;
+      height: 650px;
+
+      right: -180px;
+      top: 10%;
+
+      border-radius: 50%;
+
+      background:
+        radial-gradient(
+          circle,
+          rgba(216,255,95,0.07),
+          transparent 65%
+        );
+
+      pointer-events: none;
+    }
+
+    .hero-content {
+      max-width: 1250px;
+
+      margin: 0 auto;
+
+      width: 100%;
+
+      position: relative;
+
+      z-index: 2;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+
+      font-size: 11px;
+
+      font-weight: 700;
+
+      letter-spacing: 0.25em;
+
+      text-transform: uppercase;
+
+      margin-bottom: 30px;
+    }
+
+    .hero h1 {
+      max-width: 1150px;
+
+      font-size:
+        clamp(55px, 10vw, 145px);
+
+      line-height: 0.88;
+
+      letter-spacing: -0.065em;
+
+      font-weight: 700;
+    }
+
+    .tagline {
+      margin-top: 45px;
+
+      font-size:
+        clamp(22px, 3vw, 38px);
+
+      color: #aaa;
+
+      font-weight: 300;
+
+      letter-spacing: -0.025em;
+    }
+
+    .tagline span {
+      color: white;
+    }
+
+    .scroll {
+      position: absolute;
+
+      bottom: 40px;
+      left: 7vw;
+
+      color: #555;
+
+      font-size: 10px;
+
+      letter-spacing: 0.2em;
+
+      text-transform: uppercase;
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 15px;
+    }
+
+    .scroll::after {
+      content: "";
+
+      width: 55px;
+
+      height: 1px;
+
+      background: #444;
+    }
+
+    /* -------------------------
+       INTRO
+    ------------------------- */
+
+    .intro {
+      border-top: 1px solid var(--line);
+
+      border-bottom: 1px solid var(--line);
+
+      padding:
+        120px 7vw;
+
+      background: #0a0a0a;
+    }
+
+    .intro-inner {
+      max-width: 1150px;
+
+      margin: 0 auto;
+    }
+
+    .intro-label {
+      color: #555;
+
+      font-size: 11px;
+
+      letter-spacing: 0.2em;
+
+      text-transform: uppercase;
+
+      margin-bottom: 30px;
+    }
+
+    .intro h2 {
+      max-width: 900px;
+
+      font-size:
+        clamp(34px, 5vw, 65px);
+
+      line-height: 1.05;
+
+      letter-spacing: -0.045em;
+
+      font-weight: 500;
+    }
+
+    .intro p {
+      max-width: 650px;
+
+      margin-top: 35px;
+
+      color: #888;
+
+      font-size: 18px;
+
+      line-height: 1.8;
+    }
+
+    /* -------------------------
+       STORIES
+    ------------------------- */
+
+    .stories {
+      padding:
+        130px 7vw
+        150px;
+    }
+
+    .stories-inner {
+      max-width: 1200px;
+
+      margin: 0 auto;
+    }
+
+    .section-header {
+      display: flex;
+
+      align-items: flex-end;
+
+      justify-content: space-between;
+
+      margin-bottom: 70px;
+
+      border-bottom: 1px solid var(--line);
+
+      padding-bottom: 25px;
+    }
+
+    .section-title {
+      font-size:
+        clamp(38px, 5vw, 65px);
+
+      line-height: 1;
+
+      letter-spacing: -0.05em;
+    }
+
+    .section-count {
+      color: #555;
+
+      font-size: 11px;
+
+      letter-spacing: 0.15em;
+    }
+
+    /* -------------------------
+       ARTICLE CARDS
+    ------------------------- */
+
+    #articles {
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+      gap: 70px 45px;
+    }
+
+    .article-card {
+      display: block;
+
+      text-decoration: none;
+
+      color: inherit;
+
+      position: relative;
+
+      group: true;
+    }
+
+    .card-image {
+      width: 100%;
+
+      aspect-ratio: 16 / 10;
+
+      overflow: hidden;
+
+      background: #111;
+
+      margin-bottom: 28px;
+    }
+
+    .card-image img {
+      width: 100%;
+
+      height: 100%;
+
+      object-fit: cover;
+
+      transition:
+        transform 0.8s
+        cubic-bezier(.2,.7,.2,1);
+
+      filter: brightness(0.82);
+    }
+
+    .article-card:hover
+    .card-image img {
+      transform: scale(1.05);
+
+      filter: brightness(1);
+    }
+
+    .no-image {
+      width: 100%;
+      height: 100%;
+
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+      background:
+        radial-gradient(
+          circle at 50% 40%,
+          #202020,
+          #0d0d0d 65%
+        );
+
+      color: #333;
+
+      font-size: 50px;
+
+      font-weight: 700;
+    }
+
+    .card-meta {
+      display: flex;
+
+      justify-content: space-between;
+
+      margin-bottom: 15px;
+
+      color: var(--accent);
+
+      font-size: 10px;
+
+      font-weight: 700;
+
+      letter-spacing: 0.17em;
+
+      text-transform: uppercase;
+    }
+
+    .card-date {
+      color: #555;
+    }
+
+    .card-title {
+      font-size:
+        clamp(25px, 3vw, 40px);
+
+      line-height: 1.05;
+
+      letter-spacing: -0.04em;
+
+      transition:
+        color 0.3s ease;
+    }
+
+    .article-card:hover
+    .card-title {
+      color: var(--accent);
+    }
+
+    .card-excerpt {
+      color: #777;
+
+      font-size: 15px;
+
+      line-height: 1.7;
+
+      margin-top: 18px;
+
+      max-width: 600px;
+    }
+
+    /* -------------------------
+       EMPTY STATE
+    ------------------------- */
+
+    .empty {
+      grid-column: 1 / -1;
+
+      padding: 100px 0;
+
+      text-align: center;
+
+      border-top: 1px solid var(--line);
+
+      border-bottom: 1px solid var(--line);
+    }
+
+    .empty h3 {
+      font-size: 30px;
+
+      margin-bottom: 10px;
+    }
+
+    .empty p {
+      color: #666;
+    }
+
+    /* -------------------------
+       QUOTE
+    ------------------------- */
+
+    .quote-section {
+      min-height: 70vh;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      text-align: center;
+
+      padding: 100px 7vw;
+
+      border-top: 1px solid var(--line);
+    }
+
+    .quote-inner {
+      max-width: 1000px;
+    }
+
+    .quote-small {
+      color: #555;
+
+      font-size: 11px;
+
+      letter-spacing: 0.2em;
+
+      text-transform: uppercase;
+
+      margin-bottom: 35px;
+    }
+
+    .quote {
+      font-size:
+        clamp(45px, 8vw, 105px);
+
+      line-height: 0.95;
+
+      letter-spacing: -0.06em;
+
+      font-weight: 600;
+    }
+
+    .quote-accent {
+      color: var(--accent);
+    }
+
+    /* -------------------------
+       ABOUT
+    ------------------------- */
+
+    .about {
+      border-top: 1px solid var(--line);
+
+      padding:
+        120px 7vw;
+    }
+
+    .about-inner {
+      max-width: 1200px;
+
+      margin: 0 auto;
+
+      display: grid;
+
+      grid-template-columns:
+        1fr 1fr;
+
+      gap: 80px;
+    }
+
+    .about-label {
+      color: #555;
+
+      font-size: 11px;
+
+      letter-spacing: 0.2em;
+
+      text-transform: uppercase;
+    }
+
+    .about h2 {
+      font-size:
+        clamp(40px, 6vw, 75px);
+
+      line-height: 0.95;
+
+      letter-spacing: -0.055em;
+    }
+
+    .about-text {
+      color: #888;
+
+      font-size: 18px;
+
+      line-height: 1.8;
+
+      align-self: end;
+    }
+
+    /* -------------------------
+       FOOTER
+    ------------------------- */
+
+    footer {
+      border-top: 1px solid var(--line);
+
+      padding:
+        70px 7vw;
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      color: #555;
+
+      font-size: 10px;
+
+      letter-spacing: 0.15em;
+
+      text-transform: uppercase;
+    }
+
+    footer strong {
+      color: #888;
+    }
+
+    /* -------------------------
+       ANIMATION
+    ------------------------- */
+
+    .reveal {
+      opacity: 0;
+
+      transform: translateY(35px);
+
+      animation:
+        reveal 1s
+        cubic-bezier(.2,.7,.2,1)
+        forwards;
+    }
+
+    .delay-1 {
+      animation-delay: .15s;
+    }
+
+    .delay-2 {
+      animation-delay: .3s;
+    }
+
+    @keyframes reveal {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* -------------------------
+       MOBILE
+    ------------------------- */
+
+    @media (max-width: 750px) {
+
+      nav {
+        height: 65px;
+
+        padding: 0 22px;
+      }
+
+      .logo {
+        font-size: 9px;
+      }
+
+      .nav-links {
+        gap: 15px;
+      }
+
+      .nav-links a {
+        font-size: 9px;
+      }
+
+      .hero {
+        padding:
+          120px 24px
+          90px;
+
+        min-height: 90vh;
+      }
+
+      .hero h1 {
+        font-size:
+          clamp(52px, 15vw, 90px);
+      }
+
+      .tagline {
+        font-size: 21px;
+      }
+
+      .scroll {
+        left: 24px;
+        bottom: 30px;
+      }
+
+      .intro {
+        padding:
+          80px 24px;
+      }
+
+      .intro h2 {
+        font-size: 38px;
+      }
+
+      .stories {
+        padding:
+          90px 24px
+          100px;
+      }
+
+      .section-header {
+        margin-bottom: 45px;
+      }
+
+      #articles {
+        grid-template-columns: 1fr;
+
+        gap: 60px;
+      }
+
+      .card-title {
+        font-size: 31px;
+      }
+
+      .quote-section {
+        min-height: 65vh;
+
+        padding:
+          80px 24px;
+      }
+
+      .quote {
+        font-size: 54px;
+      }
+
+      .about {
+        padding:
+          80px 24px;
+      }
+
+      .about-inner {
+        grid-template-columns: 1fr;
+
+        gap: 40px;
+      }
+
+      .about h2 {
+        font-size: 52px;
+      }
+
+      footer {
+        padding:
+          50px 24px;
+
+        flex-direction: column;
+
+        gap: 15px;
+
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVIGATION -->
+
+  <nav>
+
+    <a
+      href="/"
+      class="logo"
+    >
+      THE BODY KNOWS
+    </a>
+
+    <div class="nav-links">
+
+      <a href="#stories">
+        Stories
+      </a>
+
+      <a href="#about">
+        About
+      </a>
+
+    </div>
+
+  </nav>
+
+
+  <!-- HERO -->
+
+  <section class="hero">
+
+    <div class="hero-glow"></div>
+
+    <div class="hero-content">
+
+      <div class="eyebrow reveal">
+        THE JOURNEY IS THE STORY
+      </div>
+
+      <h1 class="reveal delay-1">
+        The Body Knows<br>
+        What The Mind<br>
+        Feels.
+      </h1>
+
+      <div class="tagline reveal delay-2">
+        <span>Believe It.</span>
+        Feel It.
+        <span>Become It.</span>
+      </div>
+
+    </div>
+
+    <div class="scroll">
+      Scroll to explore
+    </div>
+
+  </section>
+
+
+  <!-- INTRO -->
+
+  <section class="intro">
+
+    <div class="intro-inner">
+
+      <div class="intro-label">
+        01 — THE BEGINNING
+      </div>
+
+      <h2>
+        Your mind creates the vision.
+        Your body carries the story.
+      </h2>
+
+      <p>
+        A place for thoughts, discipline,
+        struggle, strength, ambition and
+        the process of becoming.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- STORIES -->
+
+  <section
+    class="stories"
+    id="stories"
+  >
+
+    <div class="stories-inner">
+
+      <div class="section-header">
+
+        <h2 class="section-title">
+          Stories
+        </h2>
+
+        <div
+          id="count"
+          class="section-count"
+        >
+          00 STORIES
+        </div>
+
+      </div>
+
+      <div id="articles">
+
+        <div class="empty">
+
+          <h3>
+            Loading stories...
+          </h3>
+
+          <p>
+            The journey is beginning.
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- QUOTE -->
+
+  <section class="quote-section">
+
+    <div class="quote-inner">
+
+      <div class="quote-small">
+        A reminder
+      </div>
+
+      <div class="quote">
+        The journey<br>
+        is the
+        <span class="quote-accent">
+          story.
+        </span>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ABOUT -->
+
+  <section
+    class="about"
+    id="about"
+  >
+
+    <div class="about-inner">
+
+      <div>
+
+        <div class="about-label">
+          02 — ABOUT
+        </div>
+
+        <h2>
+          This is not<br>
+          about perfection.
+        </h2>
+
+      </div>
+
+      <div class="about-text">
+
+        <p>
+          It is about showing up.
+          Learning. Struggling.
+          Getting back up.
+          Becoming stronger.
+        </p>
+
+        <br>
+
+        <p>
+          These are thoughts,
+          experiences and lessons
+          collected along the way.
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    <div>
+      © 2026
+      <strong>
+        THE BODY KNOWS WHAT THE MIND FEELS
+      </strong>
+    </div>
+
+    <div>
+      Believe It. Feel It. Become It.
+    </div>
+
+  </footer>
+
+
+  <script>
+
+    // -------------------------
+    // DATE
+    // -------------------------
+
+    function formatDate(dateString) {
+
+      if (!dateString) {
+        return "";
+      }
+
+      return new Date(
+        dateString
+      ).toLocaleDateString(
+        "en-CA",
+        {
+          year: "numeric",
+          month: "short",
+          day: "numeric"
+        }
+      );
+    }
+
+
+    // -------------------------
+    // LOAD ARTICLES
+    // -------------------------
+
+    async function loadArticles() {
+
+      const container =
+        document.getElementById(
+          "articles"
+        );
+
+      try {
+
+        const response =
+          await fetch(
+            "/api/articles"
+          );
+
+        if (!response.ok) {
+          throw new Error(
+            "Could not load articles."
+          );
+        }
+
+        const articles =
+          await response.json();
+
+
+        document.getElementById(
+          "count"
+        ).textContent =
+          `${String(articles.length).padStart(2, "0")} STORIES`;
+
+
+        if (articles.length === 0) {
+
+          container.innerHTML = `
+            <div class="empty">
+              <h3>Nothing published yet.</h3>
+              <p>
+                The first story is waiting to be written.
+              </p>
+            </div>
+          `;
+
+          return;
+        }
+
+
+        container.innerHTML =
+          articles.map(
+            article => {
+
+              const image =
+                article.image_url
+                  ? `
+                    <div class="card-image">
+                      <img
+                        src="${article.image_url}"
+                        alt="${escapeHtml(article.title)}"
+                        loading="lazy"
+                      >
+                    </div>
+                  `
+                  : `
+                    <div class="card-image">
+                      <div class="no-image">
+                        +
+                      </div>
+                    </div>
+                  `;
+
+
+              return `
+                <a
+                  class="article-card"
+                  href="/article.html?slug=${encodeURIComponent(article.slug)}"
+                >
+
+                  ${image}
+
+                  <div class="card-meta">
+
+                    <span>
+                      ${escapeHtml(
+                        article.category || "STORY"
+                      )}
+                    </span>
+
+                    <span class="card-date">
+                      ${formatDate(
+                        article.created_at
+                      )}
+                    </span>
+
+                  </div>
+
+                  <h3 class="card-title">
+                    ${escapeHtml(
+                      article.title
+                    )}
+                  </h3>
+
+                  ${
+                    article.excerpt
+                      ? `
+                        <p class="card-excerpt">
+                          ${escapeHtml(
+                            article.excerpt
+                          )}
+                        </p>
+                      `
+                      : ""
+                  }
+
+                </a>
+              `;
+            }
+          )
+          .join("");
+
+      } catch (error) {
+
+        console.error(error);
+
+        container.innerHTML = `
+          <div class="empty">
+            <h3>
+              Something went wrong.
+            </h3>
+
+            <p>
+              Please refresh the page.
+            </p>
+          </div>
+        `;
+      }
+    }
+
+
+    // -------------------------
+    // SECURITY
+    // -------------------------
+
+    function escapeHtml(text) {
+
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+
+    loadArticles();
+
+  </script>
+
+</body>
+</html>
