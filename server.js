@@ -3,127 +3,64 @@ require("dotenv").config();
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const multer = require("multer");
-const fs = require("fs");
-const path = require("path");
 const crypto = require("crypto");
+const path = require("path");
+const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3000;
 
-// -------------------------
-// FOLDERS & FILES
-// -------------------------
+const PORT = process.env.PORT || 3000;
 
-const ROOT = __dirname;
-const PUBLIC_DIR = path.join(ROOT, "public");
-const UPLOADS_DIR = path.join(ROOT, "uploads");
-const DATA_DIR = path.join(ROOT, "data");
-const DATA_FILE = path.join(DATA_DIR, "articles.json");
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const SESSION_SECRET = process.env.SESSION_SECRET;
 
-fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-fs.mkdirSync(DATA_DIR, { recursive: true });
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
 
-if (!fs.existsSync(DATA_FILE)) {
-  fs.writeFileSync(DATA_FILE, "[]", "utf8");
+if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
+  console.error("Missing SUPABASE_URL or SUPABASE_SECRET_KEY in .env");
+  process.exit(1);
 }
 
-// -------------------------
-// ARTICLE STORAGE
-// -------------------------
+const supabase = createClient(
+  SUPABASE_URL,
+  SUPABASE_SECRET_KEY
+);
 
-function readArticles() {
-  try {
-    const raw = fs.readFileSync(DATA_FILE, "utf8");
-    const articles = JSON.parse(raw);
-
-    return Array.isArray(articles) ? articles : [];
-  } catch (error) {
-    console.error("Could not read articles:", error);
-    return [];
-  }
-}
-
-function writeArticles(articles) {
-  const tempFile = DATA_FILE + ".tmp";
-
-  fs.writeFileSync(
-    tempFile,
-    JSON.stringify(articles, null, 2),
-    "utf8"
-  );
-
-  fs.renameSync(tempFile, DATA_FILE);
-}
-
-// -------------------------
-// SLUG CREATOR
-// -------------------------
-
-function slugify(text) {
-  return text
-    .toString()
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "") || "article";
-}
-
-function uniqueSlug(title, articles, excludeId = null) {
-  const base = slugify(title);
-
-  let slug = base;
-  let number = 2;
-
-  while (
-    articles.some(
-      article =>
-        article.slug === slug &&
-        article.id !== excludeId
-    )
-  ) {
-    slug = `${base}-${number}`;
-    number++;
-  }
-
-  return slug;
-}
-
-// -------------------------
-// ARTICLE CLEANUP
-// -------------------------
-
-function sanitizeArticle(article) {
-  return {
-    id: article.id,
-    title: article.title,
-    slug: article.slug,
-    category: article.category,
-    excerpt: article.excerpt,
-    content: article.content,
-    published: article.published,
-    image_url: article.image_url,
-    created_at: article.created_at,
-    updated_at: article.updated_at
-  };
-}
-
-// -------------------------
-// MIDDLEWARE
-// -------------------------
-
-app.use(express.json({ limit: "2mb" }));
-app.use(cookieParser());
-
-app.use("/uploads", express.static(UPLOADS_DIR));
-app.use(express.static(PUBLIC_DIR));
-
-// -------------------------
-// LOGIN SYSTEM
-// -------------------------
+const BUCKET_NAME = "blog-images";
 
 const sessions = new Map();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024
+  },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed."));
+    }
+
+    cb(null, true);
+  }
+});
+
+app.use(express.json({ limit: "2mb" }));
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+app.use(express.static(path.join(__dirname, "public")));
+
+function makeSlug(title) {
+  return String(title)
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
 
 function requireAdmin(req, res, next) {
   const token = req.cookies.admin_session;
@@ -137,43 +74,43 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-// -------------------------
-// LOGIN
-// -------------------------
+/* =========================
+   LOGIN
+========================= */
 
 app.post("/api/login", (req, res) => {
-  const { username, password } = req.body || {};
+  const { username, password } = req.body;
 
   if (
-    username === process.env.ADMIN_USERNAME &&
-    password === process.env.ADMIN_PASSWORD
+    username !== ADMIN_USERNAME ||
+    password !== ADMIN_PASSWORD
   ) {
-    const token = crypto.randomBytes(32).toString("hex");
-
-    sessions.set(token, {
-      createdAt: Date.now()
-    });
-
-    res.cookie("admin_session", token, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false,
-      maxAge: 1000 * 60 * 60 * 24
-    });
-
-    return res.json({
-      ok: true
+    return res.status(401).json({
+      error: "Invalid username or password"
     });
   }
 
-  res.status(401).json({
-    error: "Invalid username or password"
+  const token = crypto.randomBytes(32).toString("hex");
+
+  sessions.set(token, {
+    createdAt: Date.now()
+  });
+
+  res.cookie("admin_session", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 1000 * 60 * 60 * 24 * 7
+  });
+
+  res.json({
+    success: true
   });
 });
 
-// -------------------------
-// LOGOUT
-// -------------------------
+/* =========================
+   LOGOUT
+========================= */
 
 app.post("/api/logout", (req, res) => {
   const token = req.cookies.admin_session;
@@ -185,385 +122,416 @@ app.post("/api/logout", (req, res) => {
   res.clearCookie("admin_session");
 
   res.json({
-    ok: true
+    success: true
   });
 });
 
-// -------------------------
-// IMAGE UPLOAD
-// -------------------------
+/* =========================
+   PUBLIC ARTICLES
+========================= */
 
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, callback) => {
-      callback(null, UPLOADS_DIR);
-    },
+app.get("/api/articles", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*")
+      .eq("published", true)
+      .order("created_at", { ascending: false });
 
-    filename: (req, file, callback) => {
-      const extension = path.extname(file.originalname).toLowerCase();
-
-      const filename =
-        `${Date.now()}-` +
-        `${crypto.randomBytes(6).toString("hex")}` +
-        extension;
-
-      callback(null, filename);
+    if (error) {
+      console.error(error);
+      return res.status(500).json({
+        error: "Could not load articles"
+      });
     }
-  }),
 
-  limits: {
-    fileSize: 10 * 1024 * 1024
-  },
+    res.json(data || []);
+  } catch (error) {
+    console.error(error);
 
-  fileFilter: (req, file, callback) => {
-    if (
-      file.mimetype &&
-      file.mimetype.startsWith("image/")
-    ) {
-      callback(null, true);
-    } else {
-      callback(new Error("Only image files are allowed."));
-    }
+    res.status(500).json({
+      error: "Could not load articles"
+    });
   }
 });
 
-// -------------------------
-// UPLOAD IMAGE
-// -------------------------
+/* =========================
+   PUBLIC SINGLE ARTICLE
+========================= */
+
+app.get("/api/articles/:slug", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*")
+      .eq("slug", req.params.slug)
+      .eq("published", true)
+      .single();
+
+    if (error || !data) {
+      return res.status(404).json({
+        error: "Article not found"
+      });
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      error: "Could not load article"
+    });
+  }
+});
+
+/* =========================
+   ADMIN ARTICLES
+========================= */
+
+app.get("/api/admin/articles", requireAdmin, async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(error);
+
+      return res.status(500).json({
+        error: "Could not load admin articles"
+      });
+    }
+
+    res.json(data || []);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      error: "Could not load admin articles"
+    });
+  }
+});
+
+/* =========================
+   ADMIN SINGLE ARTICLE
+========================= */
+
+app.get(
+  "/api/admin/articles/:id",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const { data, error } = await supabase
+        .from("articles")
+        .select("*")
+        .eq("id", req.params.id)
+        .single();
+
+      if (error || !data) {
+        return res.status(404).json({
+          error: "Article not found"
+        });
+      }
+
+      res.json(data);
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "Could not load article"
+      });
+    }
+  }
+);
+
+/* =========================
+   UPLOAD IMAGE
+========================= */
 
 app.post(
   "/api/admin/upload",
   requireAdmin,
   upload.single("image"),
-  (req, res) => {
-    if (!req.file) {
-      return res.status(400).json({
-        error: "No image uploaded"
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          error: "No image uploaded"
+        });
+      }
+
+      const extension =
+        path.extname(req.file.originalname).toLowerCase() ||
+        ".jpg";
+
+      const fileName =
+        `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${extension}`;
+
+      const filePath = `articles/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .upload(filePath, req.file.buffer, {
+          contentType: req.file.mimetype,
+          upsert: false
+        });
+
+      if (error) {
+        console.error(error);
+
+        return res.status(500).json({
+          error: "Image upload failed"
+        });
+      }
+
+      const {
+        data: publicUrlData
+      } = supabase.storage
+        .from(BUCKET_NAME)
+        .getPublicUrl(filePath);
+
+      res.json({
+        url: publicUrlData.publicUrl
+      });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "Image upload failed"
       });
     }
-
-    res.json({
-      url: `/uploads/${req.file.filename}`
-    });
   }
 );
 
-// -------------------------
-// PUBLIC ARTICLES
-// -------------------------
-
-app.get("/api/articles", (req, res) => {
-  const articles = readArticles()
-    .filter(article => article.published)
-    .sort(
-      (a, b) =>
-        new Date(b.created_at) -
-        new Date(a.created_at)
-    );
-
-  res.json(
-    articles.map(sanitizeArticle)
-  );
-});
-
-// -------------------------
-// PUBLIC SINGLE ARTICLE
-// -------------------------
-
-app.get("/api/articles/:slug", (req, res) => {
-  const article = readArticles().find(
-    article =>
-      article.published &&
-      article.slug === req.params.slug
-  );
-
-  if (!article) {
-    return res.status(404).json({
-      error: "Article not found"
-    });
-  }
-
-  res.json(
-    sanitizeArticle(article)
-  );
-});
-
-// -------------------------
-// ADMIN — ALL ARTICLES
-// -------------------------
-
-app.get(
-  "/api/admin/articles",
-  requireAdmin,
-  (req, res) => {
-    const articles = readArticles()
-      .sort(
-        (a, b) =>
-          new Date(b.updated_at) -
-          new Date(a.updated_at)
-      );
-
-    res.json(
-      articles.map(sanitizeArticle)
-    );
-  }
-);
-
-// -------------------------
-// ADMIN — ONE ARTICLE
-// -------------------------
-
-app.get(
-  "/api/admin/articles/:id",
-  requireAdmin,
-  (req, res) => {
-    const id = Number(req.params.id);
-
-    const article = readArticles().find(
-      article => article.id === id
-    );
-
-    if (!article) {
-      return res.status(404).json({
-        error: "Article not found"
-      });
-    }
-
-    res.json(
-      sanitizeArticle(article)
-    );
-  }
-);
-
-// -------------------------
-// CREATE ARTICLE
-// -------------------------
+/* =========================
+   CREATE ARTICLE
+========================= */
 
 app.post(
   "/api/admin/articles",
   requireAdmin,
-  (req, res) => {
-    const {
-      title,
-      category,
-      excerpt,
-      content,
-      published,
-      image_url
-    } = req.body || {};
+  async (req, res) => {
+    try {
+      const {
+        title,
+        excerpt,
+        content,
+        category,
+        published,
+        image_url
+      } = req.body;
 
-    if (!title || !content) {
-      return res.status(400).json({
-        error: "Title and content are required"
+      if (!title || !title.trim()) {
+        return res.status(400).json({
+          error: "Title is required"
+        });
+      }
+
+      let slug = makeSlug(title);
+
+      if (!slug) {
+        slug = `article-${Date.now()}`;
+      }
+
+      const { data: existing } = await supabase
+        .from("articles")
+        .select("id")
+        .eq("slug", slug)
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        slug = `${slug}-${Date.now()}`;
+      }
+
+      const { data, error } = await supabase
+        .from("articles")
+        .insert({
+          title: title.trim(),
+          slug,
+          excerpt: excerpt || "",
+          content: content || "",
+          category: category || "Mind",
+          published: Boolean(published),
+          image_url: image_url || null
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error(error);
+
+        return res.status(500).json({
+          error: "Could not create article"
+        });
+      }
+
+      res.json(data);
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "Could not create article"
       });
     }
-
-    const articles = readArticles();
-
-    const now = new Date().toISOString();
-
-    const article = {
-      id: Date.now(),
-
-      title: title.trim(),
-
-      slug: uniqueSlug(
-        title,
-        articles
-      ),
-
-      category: category || "Mind",
-
-      excerpt: excerpt || "",
-
-      content: content.trim(),
-
-      published: Boolean(published),
-
-      image_url: image_url || null,
-
-      created_at: now,
-
-      updated_at: now
-    };
-
-    articles.push(article);
-
-    writeArticles(articles);
-
-    res.status(201).json(
-      sanitizeArticle(article)
-    );
   }
 );
 
-// -------------------------
-// UPDATE ARTICLE
-// -------------------------
+/* =========================
+   UPDATE ARTICLE
+========================= */
 
 app.put(
   "/api/admin/articles/:id",
   requireAdmin,
-  (req, res) => {
-    const id = Number(req.params.id);
-
-    const articles = readArticles();
-
-    const index = articles.findIndex(
-      article => article.id === id
-    );
-
-    if (index === -1) {
-      return res.status(404).json({
-        error: "Article not found"
-      });
-    }
-
-    const oldArticle = articles[index];
-
-    const {
-      title,
-      category,
-      excerpt,
-      content,
-      published,
-      image_url
-    } = req.body || {};
-
-    if (!title || !content) {
-      return res.status(400).json({
-        error: "Title and content are required"
-      });
-    }
-
-    const updatedArticle = {
-      ...oldArticle,
-
-      title: title.trim(),
-
-      slug:
-        title.trim() !== oldArticle.title
-          ? uniqueSlug(
-              title,
-              articles,
-              id
-            )
-          : oldArticle.slug,
-
-      category: category || "Mind",
-
-      excerpt: excerpt || "",
-
-      content: content.trim(),
-
-      published: Boolean(published),
-
-      // Keep the old image if no new image was uploaded.
-      image_url:
+  async (req, res) => {
+    try {
+      const {
+        title,
+        excerpt,
+        content,
+        category,
+        published,
         image_url
-          ? image_url
-          : oldArticle.image_url,
+      } = req.body;
 
-      updated_at:
-        new Date().toISOString()
-    };
+      if (!title || !title.trim()) {
+        return res.status(400).json({
+          error: "Title is required"
+        });
+      }
 
-    articles[index] = updatedArticle;
+      const { data: currentArticle, error: findError } =
+        await supabase
+          .from("articles")
+          .select("*")
+          .eq("id", req.params.id)
+          .single();
 
-    writeArticles(articles);
+      if (findError || !currentArticle) {
+        return res.status(404).json({
+          error: "Article not found"
+        });
+      }
 
-    res.json(
-      sanitizeArticle(updatedArticle)
-    );
+      let slug = currentArticle.slug;
+
+      if (title.trim() !== currentArticle.title) {
+        slug = makeSlug(title);
+
+        if (!slug) {
+          slug = `article-${Date.now()}`;
+        }
+
+        const { data: duplicate } = await supabase
+          .from("articles")
+          .select("id")
+          .eq("slug", slug)
+          .neq("id", req.params.id)
+          .limit(1);
+
+        if (duplicate && duplicate.length > 0) {
+          slug = `${slug}-${Date.now()}`;
+        }
+      }
+
+      const updateData = {
+        title: title.trim(),
+        slug,
+        excerpt: excerpt || "",
+        content: content || "",
+        category: category || "Mind",
+        published: Boolean(published),
+        image_url:
+          image_url !== undefined
+            ? image_url || null
+            : currentArticle.image_url,
+        updated_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from("articles")
+        .update(updateData)
+        .eq("id", req.params.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error(error);
+
+        return res.status(500).json({
+          error: "Could not update article"
+        });
+      }
+
+      res.json(data);
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "Could not update article"
+      });
+    }
   }
 );
 
-// -------------------------
-// DELETE ARTICLE
-// -------------------------
+/* =========================
+   DELETE ARTICLE
+========================= */
 
 app.delete(
   "/api/admin/articles/:id",
   requireAdmin,
-  (req, res) => {
-    const id = Number(req.params.id);
+  async (req, res) => {
+    try {
+      const { error } = await supabase
+        .from("articles")
+        .delete()
+        .eq("id", req.params.id);
 
-    const articles = readArticles();
+      if (error) {
+        console.error(error);
 
-    const article = articles.find(
-      article => article.id === id
-    );
+        return res.status(500).json({
+          error: "Could not delete article"
+        });
+      }
 
-    if (!article) {
-      return res.status(404).json({
-        error: "Article not found"
+      res.json({
+        success: true
+      });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "Could not delete article"
       });
     }
+  }
+);
 
-    const remainingArticles =
-      articles.filter(
-        article => article.id !== id
-      );
+/* =========================
+   ERROR HANDLER
+========================= */
 
-    writeArticles(remainingArticles);
+app.use((err, req, res, next) => {
+  console.error(err);
 
-    // Delete uploaded image too.
-    if (
-      article.image_url &&
-      article.image_url.startsWith("/uploads/")
-    ) {
-      const filename =
-        path.basename(article.image_url);
-
-      const imagePath =
-        path.join(
-          UPLOADS_DIR,
-          filename
-        );
-
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-      }
-    }
-
-    res.json({
-      ok: true
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({
+      error: err.message
     });
   }
-);
 
-// -------------------------
-// ERROR HANDLER
-// -------------------------
+  res.status(500).json({
+    error: err.message || "Server error"
+  });
+});
 
-app.use(
-  (error, req, res, next) => {
-    console.error(error);
-
-    if (error instanceof multer.MulterError) {
-      return res.status(400).json({
-        error: error.message
-      });
-    }
-
-    if (error) {
-      return res.status(400).json({
-        error:
-          error.message ||
-          "Something went wrong"
-      });
-    }
-
-    next();
-  }
-);
-
-// -------------------------
-// START SERVER
-// -------------------------
+/* =========================
+   START SERVER
+========================= */
 
 app.listen(PORT, () => {
-  console.log(
-    `Blog running at http://localhost:${PORT}`
-  );
+  console.log(`Blog server running on port ${PORT}`);
 });
