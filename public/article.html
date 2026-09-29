@@ -494,7 +494,61 @@
     /* -------------------------
        FOOTER
     ------------------------- */
+/* -------------------------
+   NEWSLETTER
+------------------------- */
 
+.newsletter-section {
+  width: 100%;
+  padding: 100px 24px;
+  background: #0a0a0a;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.newsletter-inner {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.newsletter-label {
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: #C9E86A;
+  margin-bottom: 20px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.newsletter-inner h2 {
+  font-size: clamp(36px, 6vw, 64px);
+  line-height: 1.05;
+  margin: 0 0 20px;
+  color: #ffffff;
+  font-weight: 700;
+  text-align: center;
+}
+
+.newsletter-inner p {
+  color: #A0A0A0;
+  font-size: 18px;
+  margin-bottom: 45px;
+  text-align: center;
+}
+
+.newsletter-inner iframe {
+  display: block;
+  width: 540px;
+  max-width: 100%;
+  height: 430px;
+  margin: 0 auto;
+  border: none;
+}
     .article-footer {
       border-top: 1px solid var(--line);
 
@@ -730,6 +784,12 @@
         transition-duration: 0.01ms !important;
       }
     }
+
+        animation-iteration-count: 1 !important;
+
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TP0TKTKX9S"></script>
@@ -837,8 +897,30 @@
   >
   </main>
 
+<!-- NEWSLETTER -->
 
-  <!-- FOOTER -->
+
+<section class="newsletter-section">
+  <div class="newsletter-inner">
+
+    <div class="newsletter-label">
+      NEWSLETTER
+    </div>
+
+    <h2>
+      Become Someone You're Proud Of.
+    </h2>
+
+    <p>
+      One story. One idea. One step forward.
+    </p>
+
+  <iframe width="540" height="375" src="https://9b499ac8.sibforms.com/v2/serve/MUIFAAZgJwgrAq52qY_RLMTroZMZZ3qIFEjwcnmjA-LoR-j5aiAT3h2mUVccPgTComebLr1xjxSNi33A96qGqzVz2ak2YLmmsFBVKHcN-8ePNDZMVMJwoQa8Uu66BmuZsC6Q5afYeoG2htUqBpyM7sNsK6Q5KptJCBkn0sldIGtHLhFOP-llKwXElLyuUCjezWxiiA0V6FmkRcfjkg==" frameborder="0" scrolling="no" allowfullscreen style="display: block;margin-left: auto;margin-right: auto;max-width: 100%;"></iframe>
+
+  </div>
+</section>
+
+ <!-- FOOTER -->
 
   <footer class="article-footer">
 
