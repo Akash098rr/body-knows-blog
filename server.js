@@ -49,7 +49,42 @@ const upload = multer({
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+// automatic sitemap
+app.get("/sitemap.xml", async (req, res) => {
+  try {
+    const { data: articles, error } = await supabase
+      .from("articles")
+      .select("*")
+      .eq("published", true);
 
+    if (error) {
+      console.error("Sitemap error:", error);
+      return res.status(500).type("text/plain").send("Sitemap error");
+    }
+
+    let urls = `
+  <url>
+    <loc>https://believefeelbecome.com/</loc>
+  </url>`;
+
+    for (const article of articles || []) {
+      urls += `
+  <url>
+    <loc>https://believefeelbecome.com/article.html?slug=${encodeURIComponent(article.slug)}</loc>
+    <lastmod>${new Date(article.updated_at || article.created_at).toISOString()}</lastmod>
+  </url>`;
+    }
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}
+</urlset>`;
+
+    res.type("application/xml").send(xml);
+  } catch (err) {
+    console.error("Sitemap error:", err);
+    res.status(500).type("text/plain").send("Sitemap error");
+  }
+});
 app.use(express.static(path.join(__dirname, "public")));
 
 function makeSlug(title) {
