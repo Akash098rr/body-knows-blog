@@ -8,12 +8,9 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>The Body Knows What The Mind Feels</title>
+<title>Believe Feel Become | Stories on Mind, Body & Growth</title>
 
-  <meta
-    name="description"
-    content="The Body Knows What The Mind Feels — personal stories about mind, body, growth and life."
-  >
+  <meta name="description" content="Read stories and reflections on mindset, discipline, the body, personal growth and the journey of becoming.">
 
   <style>
     :root {
@@ -1054,7 +1051,14 @@
         document.title =
           `${article.title} — The Body Knows What The Mind Feels`;
 
+const metaDescription = document.querySelector('meta[name="description"]');
 
+if (metaDescription) {
+  metaDescription.setAttribute(
+    "content",
+    article.excerpt || "Stories and reflections on mindset, discipline, the body, personal growth and the journey of becoming."
+  );
+}
         document.getElementById(
           "category"
         ).textContent =
